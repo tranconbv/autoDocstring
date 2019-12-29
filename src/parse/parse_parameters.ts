@@ -74,18 +74,10 @@ function parseKeywordArguments(parameters: string[]): KeywordArgument[] {
     return kwargs;
 }
 
-/**
- * Check whether the annotated type is an iterator.
- * @param type The annotated type
- */
-function isIterator(type: string): boolean {
-    return type.startsWith("Generator") || type.startsWith("Iterator")
-}
-
 function parseReturn(parameters: string[], body: string[]): Returns {
     const returnType = parseReturnFromDefinition(parameters);
 
-    if (returnType == undefined || isIterator(returnType.type)) {
+    if (returnType == undefined) {
         return parseFromBody(body, /return /);
     }
 
@@ -96,11 +88,8 @@ function parseYields(parameters: string[], body: string[]): Yields {
     const parsedYield = parseReturnFromDefinition(parameters);
     const yieldType = parsedYield ? parsedYield.type : undefined;
 
-    if (yieldType == undefined || !isIterator(yieldType)) {
-        return parseFromBody(body, /yield /, `Iterator[${yieldType ? yieldType : 'type'}]`);
-    } else {
-        return parsedYield
-    }
+    // Only return Yields if "yield" keyword was found in body.
+    return parseFromBody(body, /yield /, yieldType);
 }
 
 function parseReturnFromDefinition(parameters: string[]): Returns | undefined {

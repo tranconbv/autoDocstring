@@ -1,8 +1,5 @@
 # Change Log
 
-## [0.4.1] - Unreleased
-- Fixed a bug where yield type annotations were parsed as return annotations (@HaaLeo)
-
 ## [0.4.0] - 2019-11-13
 - Omit `-> None` return annotation (@HaaLeo)
 - Add support for yields (@HaaLeo)
