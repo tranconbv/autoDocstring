@@ -2,6 +2,13 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+            "type": "npm",
+            "script": "compile",
+            "path": "extension/",
+            "group": "build",
+            "problemMatcher": []
+        },
+		{
 			"type": "npm",
 			"script": "watch",
 			"problemMatcher": "$tsc-watch",
@@ -14,5 +21,6 @@
 				"isDefault": true
 			}
 		},
+
 	]
 }

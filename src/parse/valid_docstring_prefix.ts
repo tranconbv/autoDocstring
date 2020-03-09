@@ -8,7 +8,7 @@ export function validDocstringPrefix(document: string, linePosition: number,
     const line = lines[linePosition];
     const prefix = line.slice(0, charPosition + 1);
 
-    const regex =  RegExp("^\\s*" + quoteStyle + "$");
+    const regex =  RegExp("^\\s*" + quoteStyle + "\\s*$");
 
     return  regex.test(line) && regex.test(prefix);
 }

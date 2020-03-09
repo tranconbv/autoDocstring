@@ -1,11 +1,19 @@
 import { guessType } from ".";
 import { Argument, Decorator, DocstringParts, Exception, KeywordArgument, Returns, Yields } from "../docstring_parts";
+import * as vs from "vscode";
+import {existsSync } from "fs";
+
+
+
+
+
+
 
 export function parseParameters(parameterTokens: string[], body: string[], functionName: string): DocstringParts {
     return {
         name: functionName,
         decorators: parseDecorators(parameterTokens),
-        args: parseArguments(parameterTokens),
+        args: parseArguments(parameterTokens,functionName),
         kwargs: parseKeywordArguments(parameterTokens),
         returns: parseReturn(parameterTokens, body),
         yields: parseYields(parameterTokens, body),
@@ -32,22 +40,51 @@ function parseDecorators(parameters: string[]): Decorator[] {
     return decorators;
 }
 
-function parseArguments(parameters: string[]): Argument[] {
+function parseArguments(parameters: string[],functionName: string): Argument[] {
+    const fs = require('fs');
+    const boxwiseFunctionsFile = vs.workspace.getConfiguration("autoDocstring").get("boxwiseFunctions").toString()
     const args: Argument[] = [];
-    const excludedArgs = ["self", "cls"];
+    const excludedArgs = ["self", "cls","base"];
     const pattern = /^(\w+)/;
+    let boxwiseFunction = false;
+    let functionVariables = []
+    if(boxwiseFunctionsFile !== "")
+    {
+        if (existsSync(boxwiseFunctionsFile)) 
+        {
+            let rawdata = fs.readFileSync(boxwiseFunctionsFile);
+            let data = JSON.parse(rawdata);
+            if(functionName in data)
+            {
+                functionVariables = data[functionName]
+                if(functionVariables.length === (parameters.length-1))
+                {
+                    boxwiseFunction = true;
+                }
 
+            }
+        }
+    }
     for (const param of parameters) {
         const match = param.trim().match(pattern);
 
         if (match == undefined || param.includes("=") || inArray(param, excludedArgs)) {
             continue;
         }
+        if(boxwiseFunction)
+        {
+            args.push({
+                var: match[1],
+                type: functionVariables[parameters.indexOf(param)-1],
+            });
+        } else
+        {
+            args.push({
+                var: match[1],
+                type: guessType(param),
+            });
+        }
 
-        args.push({
-            var: match[1],
-            type: guessType(param),
-        });
     }
 
     return args;
