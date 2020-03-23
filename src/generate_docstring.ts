@@ -12,7 +12,7 @@ export class AutoDocstring {
         this.editor = editor;
     }
 
-    public generateDocstring(hook:string): Thenable<boolean> {
+    public generateDocstring(hook = "" ): Thenable<boolean> {
         const document = this.editor.document.getText();
         const position = this.editor.selection.active;
 

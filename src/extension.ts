@@ -12,7 +12,7 @@ export function activate(context: vs.ExtensionContext): void {
     const fs = require('fs');
 	const rawdata = fs.readFileSync(boxwiseFunctionsFile);
     const data = JSON.parse(rawdata);
-    const hooks:{} = data['scriptOverrideables'];
+    const hooks:{} = data.scriptOverrideables;
     const keys = Object.keys(hooks);
     context.subscriptions.push(
         vs.commands.registerCommand(
@@ -28,7 +28,7 @@ export function activate(context: vs.ExtensionContext): void {
                     const options = ['standard','boxwise']
                     const selection = await vs.window.showQuickPick(options, quickPickOptions);
                     if (selection === 'standard') {
-                        return autoDocstring.generateDocstring("");
+                        return autoDocstring.generateDocstring();
                     } else if(selection === 'boxwise'){
                         const hook = await vs.window.showQuickPick(keys, quickPickOptions);
                         return autoDocstring.generateDocstring(hook);
