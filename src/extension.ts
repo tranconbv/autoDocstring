@@ -8,15 +8,33 @@ export const generateDocstringCommand = "autoDocstring.generateDocstring";
 export function activate(context: vs.ExtensionContext): void {
     const quoteStyle = vs.workspace.getConfiguration("autoDocstring").get("quoteStyle").toString()
     const activationChar = quoteStyle ? quoteStyle[0] : '"';
-
+    const boxwiseFunctionsFile = vs.workspace.getConfiguration("autoDocstring").get("boxwiseFunctions").toString()
+    const fs = require('fs');
+	const rawdata = fs.readFileSync(boxwiseFunctionsFile);
+    const data = JSON.parse(rawdata);
+    const hooks:{} = data['scriptOverrideables'];
+    const keys = Object.keys(hooks);
     context.subscriptions.push(
         vs.commands.registerCommand(
-            generateDocstringCommand, () => {
+            generateDocstringCommand, async () => {
                 const editor = vs.window.activeTextEditor;
                 const autoDocstring = new AutoDocstring(editor);
 
                 try {
-                    return autoDocstring.generateDocstring();
+                    const quickPickOptions: vs.QuickPickOptions = {
+                        matchOnDetail: true,
+                        matchOnDescription: true,
+                    };
+                    const options = ['standard','boxwise']
+                    const selection = await vs.window.showQuickPick(options, quickPickOptions);
+                    if (selection === 'standard') {
+                        return autoDocstring.generateDocstring("");
+                    } else if(selection === 'boxwise'){
+                        const hook = await vs.window.showQuickPick(keys, quickPickOptions);
+                        return autoDocstring.generateDocstring(hook);
+                    } else {
+                        return
+                    }
                 } catch (error) {
                     vs.window.showErrorMessage("AutoDocstring encountered an error:", error);
                 }
@@ -51,11 +69,13 @@ function validEnterActivation(document: vs.TextDocument, position: vs.Position, 
     );
 }
 
+
+
 /**
  * Completion item to trigger generate docstring command on docstring prefix
  */
 class AutoDocstringCompletionItem extends vs.CompletionItem {
-    constructor(_: vs.TextDocument, position: vs.Position) {
+    constructor(_: vs.TextDocument, position: vs.Position ) {
         super('""" Generate Docstring """', vs.CompletionItemKind.Snippet);
         this.insertText = "";
         this.sortText = "\0";

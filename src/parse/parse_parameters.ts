@@ -53,7 +53,7 @@ function parseArguments(parameters: string[],functionName: string): Argument[] {
         if (existsSync(boxwiseFunctionsFile)) 
         {
             let rawdata = fs.readFileSync(boxwiseFunctionsFile);
-            let data = JSON.parse(rawdata);
+            let data = JSON.parse(rawdata)["scriptOverrideables"];
             if(functionName in data)
             {
                 functionVariables = data[functionName]

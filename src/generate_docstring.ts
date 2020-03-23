@@ -12,16 +12,16 @@ export class AutoDocstring {
         this.editor = editor;
     }
 
-    public generateDocstring(): Thenable<boolean> {
+    public generateDocstring(hook:string): Thenable<boolean> {
         const document = this.editor.document.getText();
         const position = this.editor.selection.active;
 
-        const docstringSnippet = this.generateDocstringSnippet(document, position);
+        const docstringSnippet = this.generateDocstringSnippet(document, position,hook);
         const insertPosition = position.with(undefined, 0);
         return this.editor.insertSnippet(docstringSnippet, insertPosition);
     }
 
-    private generateDocstringSnippet(document: string, position: vs.Position): vs.SnippetString {
+    private generateDocstringSnippet(document: string, position: vs.Position,hook:string): vs.SnippetString {
         const config = this.getConfig();
 
         const docstringFactory = new DocstringFactory(
@@ -33,7 +33,7 @@ export class AutoDocstring {
             config.get("guessTypes") === true,
         );
 
-        const docstringParts = parse(document, position.line);
+        const docstringParts = parse(document, position.line,hook);
         const indentation = getDocstringIndentation(document, position.line);
         const docstring = docstringFactory.generateDocstring(docstringParts, indentation);
 
